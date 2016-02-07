@@ -1,37 +1,50 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
-```{r load libraries}
 
+```r
 library(readr)
 library(dplyr)
-library(ggplot2)
+```
 
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+library(ggplot2)
 ```
 
 ## Loading and preprocessing the data
 
 
 
-```{r read data}
 
+```r
 ## Loading and preprocessing the data
 file_path <- unzip("activity.zip")
 act <- read_csv(file_path)
 # dates are properly read in by readr as Date 
-
 ```
 
 
 
 
 ## What is mean total number of steps taken per day?
-```{r mean daily step total}
 
+```r
 act_by_day <- act %>%
   group_by(date) %>%
   summarize(daily_total_steps = sum(steps, na.rm = TRUE)) 
@@ -42,35 +55,63 @@ dts.d <- median(act_by_day$daily_total_steps, na.rm = TRUE)
 abline(v = dts.m, col = "blue")
 abline(v = dts.d, col = "green")
 legend("topright", c("Mean", "Median"), col = c("blue", "green"), lty = 1)
-
 ```
+
+![](PA1_template_files/figure-html/mean daily step total-1.png)
 
 
 ## What is the average daily activity pattern?
-```{r mean by time of day}
 
+```r
 act_by_time <- act %>%
   group_by(interval) %>%
   summarize(mean_steps_at_time = mean(steps, na.rm = TRUE)) 
 
 ggplot(act_by_time, aes(x= interval, y = mean_steps_at_time)) +
   geom_line()
+```
 
+![](PA1_template_files/figure-html/mean by time of day-1.png)
+
+```r
 # Q: Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? 
 # A: The interval beginning at: 
 with(act_by_time, interval[which.max(mean_steps_at_time)])
+```
 
+```
+## [1] 835
 ```
 
 
 
 ## Imputing missing values
-```{r imputing missing values}
 
+```r
 # The total number of rows with an NA in the dataset: 
 sum(!complete.cases(act))
-  
+```
+
+```
+## [1] 2304
+```
+
+```r
 lapply(act, function(x) sum(is.na(x)))
+```
+
+```
+## $steps
+## [1] 2304
+## 
+## $date
+## [1] 0
+## 
+## $interval
+## [1] 0
+```
+
+```r
 # all the NAs are only in the "steps" column
 
 # As the question suggests, impute NAs with with the mean for that 5-minute interval
@@ -92,16 +133,31 @@ dts.d.imp <- median(act_by_day_imputed$daily_total_steps)
 abline(v = dts.m.imp, col = "blue")
 abline(v = dts.d.imp, col = "green")
 legend("topright", c("Mean", "Median"), col = c("blue", "green"), lty = 1)
+```
 
+![](PA1_template_files/figure-html/imputing missing values-1.png)
+
+```r
 # unsurprisingly, there is a difference on mean and median of daily total steps. It appears that teh imputation leads to an higher estimate of both mean and median, by 1412 and 371 steps, respectively.
 dts.m.imp - dts.m
-dts.d.imp - dts.d
+```
 
+```
+## [1] 1411.959
+```
+
+```r
+dts.d.imp - dts.d
+```
+
+```
+## [1] 371.1887
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+
+```r
 by_weekday <- act_with_imputedNAs %>%
   mutate(day = weekdays(date))
 
@@ -118,9 +174,9 @@ act_by_weekday_and_time <- by_weekday %>%
 ggplot(act_by_weekday_and_time, 
        aes(x= interval, y = mean_steps_at_time)) +  
   geom_line() + facet_wrap(~day, ncol = 1)
-
-         
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png)
 
 
 
