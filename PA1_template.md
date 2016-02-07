@@ -57,7 +57,7 @@ abline(v = dts.d, col = "green")
 legend("topright", c("Mean", "Median"), col = c("blue", "green"), lty = 1)
 ```
 
-![](PA1_completed_files/figure-html/mean daily step total-1.png)
+![](PA1_template_files/figure-html/mean daily step total-1.png)
 
 
 ## What is the average daily activity pattern?
@@ -71,7 +71,7 @@ ggplot(act_by_time, aes(x= interval, y = mean_steps_at_time)) +
   geom_line()
 ```
 
-![](PA1_completed_files/figure-html/mean by time of day-1.png)
+![](PA1_template_files/figure-html/mean by time of day-1.png)
 
 ```r
 # Q: Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? 
@@ -135,7 +135,7 @@ abline(v = dts.d.imp, col = "green")
 legend("topright", c("Mean", "Median"), col = c("blue", "green"), lty = 1)
 ```
 
-![](PA1_completed_files/figure-html/imputing missing values-1.png)
+![](PA1_template_files/figure-html/imputing missing values-1.png)
 
 ```r
 # unsurprisingly, there is a difference on mean and median of daily total steps. It appears that teh imputation leads to an higher estimate of both mean and median, by 1412 and 371 steps, respectively.
@@ -176,7 +176,7 @@ ggplot(act_by_weekday_and_time,
   geom_line() + facet_wrap(~day, ncol = 1)
 ```
 
-![](PA1_completed_files/figure-html/unnamed-chunk-1-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png)
 
 
 
