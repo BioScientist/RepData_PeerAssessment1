@@ -5,21 +5,123 @@ output:
     keep_md: true
 ---
 
+```{r load libraries}
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+```
+
+
+
+```{r read data}
 
 ## Loading and preprocessing the data
+#file_path <- unzip("activity.zip")
+act <- read_csv(file_path)
+# dates are properly read in by readr as Date 
+
+```
 
 
 
+
+```{r mean daily step total}
 ## What is mean total number of steps taken per day?
 
+act_by_day <- act %>%
+  group_by(date) %>%
+  summarize(daily_total_steps = sum(steps, na.rm = TRUE)) 
+
+hist(act_by_day$daily_total_steps, xlab = "Daily Total Steps")
+dts.m <- mean(  act_by_day$daily_total_steps, na.rm = TRUE)
+dts.d <- median(act_by_day$daily_total_steps, na.rm = TRUE)
+abline(v = dts.m, col = "blue")
+abline(v = dts.d, col = "green")
+legend("topright", c("Mean", "Median"), col = c("blue", "green"), lty = 1)
+
+```
 
 
+```{r mean by time of day}
 ## What is the average daily activity pattern?
 
+act_by_time <- act %>%
+  group_by(interval) %>%
+  summarize(mean_steps_at_time = mean(steps, na.rm = TRUE)) 
+
+ggplot(act_by_time, aes(x= interval, y = mean_steps_at_time)) +
+  geom_line()
+
+# Q: Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? 
+# A: The interval beginning at: 
+with(act_by_time, interval[which.max(mean_steps_at_time)])
+
+```
 
 
+
+```{r imputing missing values}
 ## Imputing missing values
 
+# The total number of rows with an NA in the dataset: 
+sum(!complete.cases(act))
+  
+lapply(act, function(x) sum(is.na(x)))
+# all the NAs are only in the "steps" column
+
+# impute with mean for that 5-minute interval
+act_with_imputedNAs <- act %>%
+  group_by(interval) %>%
+  mutate(mean_steps_at_time = mean(steps, na.rm = TRUE),
+         steps = ifelse(is.na(steps), mean_steps_at_time, steps)) %>%
+  select(-mean_steps_at_time)
 
 
+act_by_day_imputed <- act_with_imputedNAs %>%
+  group_by(date) %>%
+  summarize(daily_total_steps = sum(steps, na.rm = TRUE)) 
+
+
+hist(act_by_day_imputed$daily_total_steps, xlab = "Daily Total Steps")
+dts.m.imp <- mean(  act_by_day_imputed$daily_total_steps)
+dts.d.imp <- median(act_by_day_imputed$daily_total_steps)
+abline(v = dts.m.imp, col = "blue")
+abline(v = dts.d.imp, col = "green")
+legend("topright", c("Mean", "Median"), col = c("blue", "green"), lty = 1)
+
+# unsurprisingly, there is a difference on mean and median of daily total steps. It appears that teh imputation leads to an higher estimate of both mean and median, by 1412 and 371 steps, respectively.
+dts.m.imp - dts.m
+dts.d.imp - dts.d
+
+```
+
+
+```{r}
 ## Are there differences in activity patterns between weekdays and weekends?
+by_weekday <- act_with_imputedNAs %>%
+  mutate(day = weekdays(date))
+
+by_weekday <- within(by_weekday, {
+  day[day %in% c("Saturday", "Sunday")] <- "weekend"
+  day[day != "weekend"] <- "weekday"
+  day <- factor(day)
+  })
+
+act_by_weekday_and_time <- by_weekday %>%
+  group_by(interval, day) %>%
+  summarize(mean_steps_at_time = mean(steps) )
+
+ggplot(act_by_weekday_and_time, aes(x= interval, y = mean_steps_at_time)) +
+  geom_line() + facet_wrap(~day, ncol = 1)
+
+ggplot(by_time_in_week, aes(x = interval, y = steps))
+         
+```
+
+
+
+
+
+
